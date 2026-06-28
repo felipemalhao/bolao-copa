@@ -336,14 +336,15 @@ function toLocalInput(iso){ const d=new Date(iso); const p=n=>String(n).padStart
 const nameInput=document.getElementById('playerName');
 const saveBtn=document.getElementById('saveBtn');
 function nameKey(n){ return n.trim().toLowerCase().replace(/\s+/g,' '); }
-function refreshReceipt(){ renderReceipt(myPicks); }
+function saveDraft(){ try{ localStorage.setItem('bolao_draft', JSON.stringify(myPicks)); }catch(e){} }
+function refreshReceipt(){ renderReceipt(myPicks); saveDraft(); }
 
 document.getElementById('loadBtn').onclick=async()=>{
   const n=nameInput.value.trim();
   if(!n){ toast('Digite seu nome primeiro',true); return; }
   myName=n;
   const {data}=await db.from('bolao_predictions').select('picks').eq('name_key',nameKey(n)).maybeSingle();
-  myPicks = data ? (data.picks||{}) : {};
+  if(data){ myPicks = data.picks||{}; }   // tem palpite salvo -> carrega; senao, mantem o que ja foi clicado
   normalize(myPicks);
   checkLock();
   saveBtn.disabled=isLocked;
@@ -442,6 +443,8 @@ function buildLegend(){
 document.querySelectorAll('.ptlegend').forEach(el=>el.innerHTML=buildLegend());
 
 (async()=>{
+  try{ const dr=JSON.parse(localStorage.getItem('bolao_draft')||'{}'); if(dr&&typeof dr==='object') myPicks=dr; }catch(e){}
+  normalize(myPicks);
   renderBracket('bracket-palpite', myPicks, {editable:true, clearable:true, results, onpick:refreshReceipt});
   setInterval(fmtRemain,1000);
   await loadState();
