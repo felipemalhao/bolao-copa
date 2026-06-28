@@ -426,9 +426,10 @@ document.getElementById('refreshRank').onclick=loadRanking;
 
 /* ---------- Init ---------- */
 (async()=>{
+  renderBracket('bracket-palpite', myPicks, {editable:true, results, onpick:refreshReceipt});
+  setInterval(fmtRemain,1000);
   await loadState();
   renderBracket('bracket-palpite', myPicks, {editable:!isLocked, results, onpick:refreshReceipt});
-  setInterval(fmtRemain,1000);
 })();
 </script>
 </body>
